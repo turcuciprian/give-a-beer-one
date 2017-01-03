@@ -10,18 +10,14 @@
   Text Domain: countdown-timer-one
  */
 
- if(!function_exists('gabo_enqueueAll')){
    //Admin scripts and styles
    add_action('wp_enqueue_scripts', 'gabo_enqueueAll');
    //Admin scripts and styles callback
    function gabo_enqueueAll()
    {
      gabo_Exists('gabo_customStyle', 'style.css', 'style',array(),'plugin');
-     gabo_Exists('gabo_customStyle', 'style.css', 'style',array(),'plugin');
        gabo_Exists('gabo_customScript', 'script.js', 'script',array(),'plugin');
-     }
    }
-
 
 
 
@@ -31,7 +27,7 @@
        $fileExists = false;
 
        if($exportType==='theme'){
-         $file = get_template_directory_uri().'/'.$path;
+         $file = get_template_diregabory_uri().'/'.$path;
        }else{
          $file = plugin_dir_url(__FILE__).$path;
        }
@@ -61,74 +57,38 @@
 
 
  /**
-  * Adds Foo_Widget widget.
+  * Adds gabo_widget widget.
   */
- class Foo_Widget extends WP_Widget {
+ class gabo_widget extends WP_Widget {
 
  	/**
  	 * Register widget with WordPress.
  	 */
  	function __construct() {
  		parent::__construct(
- 			'foo_widget', // Base ID
- 			esc_html__( 'Countdown Timer One', 'text_domain' ), // Name
- 			array( 'description' => esc_html__( 'CTO Widget', 'text_domain' ), ) // Args
+ 			'gabo_widget', // Base ID
+ 			esc_html__( 'Give a Beer One', 'text_domain' ), // Name
+ 			array( 'description' => esc_html__( 'Settings for the give a beer widget', 'text_domain' ), ) // Args
  		);
  	}
 
- 	/**
- 	 * Front-end display of widget.
- 	 *
- 	 * @see WP_Widget::widget()
- 	 *
- 	 * @param array $args     Widget arguments.
- 	 * @param array $instance Saved values from database.
- 	 */
  	public function widget( $args, $instance ) {
  		echo $args['before_widget'];
  		if ( ! empty( $instance['title'] ) ) {
  			echo $args['before_title'] . apply_filters( 'widget_title', $instance['title'] ) . $args['after_title'];
  		}
-
+    $pluginPath = plugin_dir_url(__FILE__);
+    $beerImg =$pluginPath."/img/style1.png";
     ?>
+    <div class="gaboWidget">
+      <img src="<?php echo $beerImg;?>" alt="Beer image">
+      <p>
+        Click Beer to
+        <br/>
+        Give beer
+      </p>
 
-    <div id="ctoWidget">
     </div>
-    <script type="text/javascript">
-    function gabo_getTimeRemaining(endtime){
-      var t = Date.parse(endtime) - Date.parse(new Date());
-      var seconds = Math.floor( (t/1000) % 60 );
-      var minutes = Math.floor( (t/1000/60) % 60 );
-      var hours = Math.floor( (t/(1000*60*60)) % 24 );
-      var days = Math.floor( t/(1000*60*60*24) );
-      return {
-        'total': t,
-        'days': days,
-        'hours': hours,
-        'minutes': minutes,
-        'seconds': seconds
-      };
-    }
-    function gabo_initializeClock(id, endtime){
-  var clock = document.getElementById(id);
-  var timeinterval = setInterval(function(){
-    var t = gabo_getTimeRemaining(endtime);
-    clock.innerHTML = 'days: ' + t.days + '<br>' +
-                      'hours: '+ t.hours + '<br>' +
-                      'minutes: ' + t.minutes + '<br>' +
-                      'seconds: ' + t.seconds;
-    if(t.total<=0){
-      clearInterval(timeinterval);
-    }
-  },1000);
-}
-var hrs = -(new Date().getTimezoneOffset() / 60)
-var gabo_Deadline = '<?php echo $instance['gabo_toDate'];?> <?php echo $instance['gabo_toTime'];?> GMT'+hrs;
-gabo_initializeClock('ctoWidget', gabo_Deadline);
-var d = new Date()
-var n = d.getTimezoneOffset();
-console.log(n/60);
-    </script>
     <?php
  		echo $args['after_widget'];
  	}
@@ -143,45 +103,10 @@ console.log(n/60);
  	public function form( $instance ) {
 
     $title = ! empty( $instance['title'] ) ? $instance['title'] : esc_html__( 'New title', 'text_domain' );
-    $gabo_toDate = (! empty( $instance['gabo_toDate'] ) && isset($instance['gabo_toDate'])) ? $instance['gabo_toDate'] : esc_html__( '', 'text_domain' );
- 		$gabo_toTime = (! empty( $instance['gabo_toTime'] ) && isset($instance['gabo_toTime'])) ? $instance['gabo_toTime'] : esc_html__( '', 'text_domain' );
  		?>
  		<p>
         <label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"><?php esc_attr_e( 'Title:', 'text_domain' ); ?></label>
  		    <input class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>">
- 		</p>
-    <p>
-        <label for="<?php echo esc_attr( $this->get_field_id( 'gabo_toDate' ) ); ?>"><?php esc_attr_e( 'End date:', 'text_domain' ); ?></label>
- 		    <input class="widefat aBDatepicker" id="<?php echo esc_attr( $this->get_field_id( 'gabo_toDate' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'gabo_toDate' ) ); ?>" type="text" value="<?php echo esc_attr( $gabo_toDate ); ?>">
-        <script type="text/javascript">
-        jQuery(document).ready(function($) {
-          var aBDatePicker = $('.aBDatepicker');
-          aBDatePicker.on('hover',function(){
-            if (aBDatePicker[0]) {
-                //check if datepicker exists as a function
-                if (typeof aBDatePicker.datepicker == 'function') {
-                  aBDatePicker.datepicker({
-                      dateFormat: $(self).attr('data-dateformat')
-                  });
-                }
-            }
-          });
-
-
-          //Timepicker
-          var aBTimepicker = $('.aBTimepicker');
-
-          if (aBTimepicker[0]) {
-              if (typeof aBTimepicker.timepicker == 'function') {
-                  aBTimepicker.timepicker({timeFormat: 'h:i A',});
-              }
-          }
-        });
-        </script>
- 		</p>
-    <p>
-        <label for="<?php echo esc_attr( $this->get_field_id( 'gabo_toTime' ) ); ?>"><?php esc_attr_e( 'END time:', 'text_domain' ); ?></label>
- 		    <input class="widefat aBTimepicker" id="<?php echo esc_attr( $this->get_field_id( 'gabo_toTime' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'gabo_toTime' ) ); ?>" type="text" value="<?php echo esc_attr( $gabo_toTime ); ?>">
  		</p>
 
  		<?php
@@ -203,8 +128,6 @@ console.log(n/60);
 
  		$instance = array();
     $instance['title'] = ( ! empty( $new_instance['title'] ) ) ? strip_tags( $new_instance['title'] ) : '';
-    $instance['gabo_toDate'] = ( ! empty( $new_instance['gabo_toDate'] ) ) ? strip_tags( $new_instance['gabo_toDate'] ) : '';
- 		$instance['gabo_toTime'] = ( ! empty( $new_instance['gabo_toTime'] ) ) ? strip_tags( $new_instance['gabo_toTime'] ) : '';
 
  		return $instance;
  	}
@@ -213,6 +136,6 @@ console.log(n/60);
 
  // register Foo_Widget widget
 function gabo_register_widget() {
-    register_widget( 'Foo_Widget' );
+    register_widget( 'gabo_widget' );
 }
 add_action( 'widgets_init', 'gabo_register_widget' );
