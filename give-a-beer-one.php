@@ -16,7 +16,9 @@
    function gabo_enqueueAll()
    {
      gabo_Exists('gabo_customStyle', 'style.css', 'style',array(),'plugin');
+     wp_enqueue_script('jquery');
        gabo_Exists('gabo_customScript', 'script.js', 'script',array(),'plugin');
+       wp_add_inline_script( 'gabo_customScript', 'var pluginUrl = \''.plugin_dir_url(__FILE__).'\'' );
    }
 
 

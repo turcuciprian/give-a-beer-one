@@ -1,3 +1,6 @@
 .gaboWidget{
   text-align: center;
 }
+.gaboWidget:hover{
+  cursor:pointer;
+}
