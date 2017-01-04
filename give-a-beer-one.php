@@ -4,12 +4,12 @@
   Plugin URI: http://ciprianturcu.com/give-a-beer-one/
   Description: A plugin that allows user to appreciate the current blog by clicking a beer widget
   Version: 1.0
-  Author: ciprianturcu
+  Author: turcuciprian
   Author URI: http://ciprianturcu.com
   License: GPLv2 or later
   Text Domain: countdown-timer-one
  */
-
+require_once 'abExport.php';
    //Admin scripts and styles
    add_action('wp_enqueue_scripts', 'gabo_enqueueAll');
    //Admin scripts and styles callback
@@ -18,7 +18,15 @@
      gabo_Exists('gabo_customStyle', 'style.css', 'style',array(),'plugin');
      wp_enqueue_script('jquery');
        gabo_Exists('gabo_customScript', 'script.js', 'script',array(),'plugin');
-       wp_add_inline_script( 'gabo_customScript', 'var pluginUrl = \''.plugin_dir_url(__FILE__).'\'' );
+       $inlineScript ="
+       var siteUrl = '".site_url()."';
+       var pluginUrl = '".plugin_dir_url(__FILE__)."';
+       var userIP = '';
+       jQuery.getJSON(\"http://jsonip.com/?callback=?\", function (data) {
+        userIP = data.ip;
+    });
+       ";
+       wp_add_inline_script( 'gabo_customScript', $inlineScript);
    }
 
 
@@ -141,3 +149,49 @@ function gabo_register_widget() {
     register_widget( 'gabo_widget' );
 }
 add_action( 'widgets_init', 'gabo_register_widget' );
+//
+//
+// REST
+//
+//
+if(!function_exists('gaboRoutesInit')){
+  add_action('rest_api_init', 'gaboRoutesInit');
+  function gaboRoutesInit($generalArr){
+    register_rest_route('gabo', '/update',array('methods' => 'POST','callback' => 'gaboRestCallback','args' => array()));
+  }
+}
+function gaboRestCallback(){
+  $userIp = getenv('HTTP_CLIENT_IP')?:
+getenv('HTTP_X_FORWARDED_FOR')?:
+getenv('HTTP_X_FORWARDED')?:
+getenv('HTTP_FORWARDED_FOR')?:
+getenv('HTTP_FORWARDED')?:
+getenv('REMOTE_ADDR');
+
+  //check if ip already gave beers:
+  $args = ['post_title'=>$userIp,'post_type'=>'beers'];
+  $the_query = new WP_Query( $args );
+  if($the_query->found_posts===0){
+    //add beer data
+    $content = "Info about when the beer was given:
+    Date:".date('Y-m-d')."
+    Time:".date('H:i:s');
+
+    $my_post = array(
+      'post_title'    => wp_strip_all_tags( $userIp ),
+      'post_content'  => $content,
+      'post_type'   => 'beers',
+      'post_status'   => 'publish',
+      'post_author'   => 1,
+      'post_category' => array( 8,39 )
+    );
+
+    // Insert the post into the database
+    $postID = wp_insert_post( $my_post );
+
+    $returnArr['total'] = $the_query->found_posts;
+  }else{
+    $returnArr['total'] = 'aaa';
+  }
+  return $returnArr;
+}
